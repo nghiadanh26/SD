@@ -8,46 +8,56 @@ from keras.layers import Dropout
 from keras.layers import GRU
 from keras.callbacks import ModelCheckpoint
 
+
+def get_text(data, size_min = 1000):
+    relevant_columns_id = [11, 13, 15, 16, 17, 19, 21, 24, 25] #23
+    questions = data[data.columns[relevant_columns_id]]
+    raw_text = ""
+    nbs_responses = []
+    for i in range(len(questions.columns)):
+        k = 0
+        print(i)
+        for answer in questions[questions.columns[i]].dropna():
+            if len(answer) <= size_min:
+                continue
+            k += 1
+            raw_text += answer + " ||| "
+        nbs_responses.append(k)
+    print(len(raw_text))
+    print(nbs_responses)
+    
+    print("preprocessing of raw_text")
+    raw_text = raw_text.replace('.', ' . ')
+    raw_text = raw_text.replace('\n', ' \n ')
+    raw_text = raw_text.replace('\t', ' ')
+    raw_text = raw_text.replace('\u200e', 'r')
+    raw_text = raw_text.replace('\uf0f9', '')
+    raw_text = raw_text.replace('\u200b', '')
+    raw_text = raw_text.replace('\uf072', '')
+    raw_text = raw_text.replace('\uf0a7', '')
+    raw_text = raw_text.replace('\u2009', ' ')
+    raw_text = raw_text.replace('\u202f', ' ')
+    raw_text = raw_text.replace('\uf0e8', '')
+    raw_text = raw_text.replace('\u2003', '')
+    raw_text = raw_text.replace('\uf0b7', '')
+    raw_text = raw_text.replace('\uf0b8', '')
+    raw_text = raw_text.replace('\uf0e0', '')
+    raw_text = raw_text.replace('\uf04a', '')
+    raw_text = raw_text.replace('\xad', '')
+    raw_text = raw_text.replace('\uf0d8', '')
+    raw_text = raw_text.replace('\uf0fc', '')
+    raw_text = raw_text.replace('\xa0', '')
+    raw_text = raw_text.replace('\uf0f0', '')
+    
+    return raw_text
+
+
+    
+    
+    
 data = pd.read_csv("LA_TRANSITION_ECOLOGIQUE.csv")
-relevant_columns_id = [11, 13, 15, 16, 17, 19, 21, 24, 25] #23
+raw_text = get_text(data)
 
-questions = data[data.columns[relevant_columns_id]]
-raw_text = ""
-nbs_responses = []
-for i in range(len(questions.columns)):
-    k = 0
-    print(i)
-    for answer in questions[questions.columns[i]].dropna():
-        if len(answer) <= 1000:
-            continue
-        k += 1
-        raw_text += answer + " ||| "
-    nbs_responses.append(k)
-print(len(raw_text))
-print(nbs_responses)
-
-print("preprocessing of raw_text")
-raw_text = raw_text.replace('.', ' . ')
-raw_text = raw_text.replace('\n', ' \n ')
-raw_text = raw_text.replace('\t', ' ')
-raw_text = raw_text.replace('\u200e', 'r')
-raw_text = raw_text.replace('\uf0f9', '')
-raw_text = raw_text.replace('\u200b', '')
-raw_text = raw_text.replace('\uf072', '')
-raw_text = raw_text.replace('\uf0a7', '')
-raw_text = raw_text.replace('\u2009', ' ')
-raw_text = raw_text.replace('\u202f', ' ')
-raw_text = raw_text.replace('\uf0e8', '')
-raw_text = raw_text.replace('\u2003', '')
-raw_text = raw_text.replace('\uf0b7', '')
-raw_text = raw_text.replace('\uf0b8', '')
-raw_text = raw_text.replace('\uf0e0', '')
-raw_text = raw_text.replace('\uf04a', '')
-raw_text = raw_text.replace('\xad', '')
-raw_text = raw_text.replace('\uf0d8', '')
-raw_text = raw_text.replace('\uf0fc', '')
-raw_text = raw_text.replace('\xa0', '')
-raw_text = raw_text.replace('\uf0f0', '')
 
 char_set = sorted(list(set(raw_text)))
 char_to_int = dict((c, i) for i, c in enumerate(char_set))
@@ -82,7 +92,7 @@ X = np.reshape(X, (len(Y), seq_max, 1))/len(char_set)
 print(X.shape, Y.shape)
 
 print("END OF PREPROCESSING")
-print("BUILIND MODEL")
+print("BUILDIND MODEL")
 
 # define the GRU model
 model = Sequential()
